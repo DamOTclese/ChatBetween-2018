@@ -1,0 +1,56 @@
+
+// ----------------------------------------------------------------------
+// ChatClass -- small class that implements a subnet-wide chat
+// function interface via UDP frames transmitted and sent across two
+// different port numbers as broadcasted UDP frames.
+//
+// Fredric L. Rice, June 2018
+// http://www.crystallake.name
+// fred @ crystal lake . name
+// 
+// ----------------------------------------------------------------------
+
+#ifndef _CHATCLASS_H_
+#define _CHATCLASS_H_      1
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <fcntl.h>
+
+    typedef struct FILE_TRANSFER_HEADER
+    {
+        char header_command[ 11 ];
+        char file_name[ 101 ];
+        int  file_size;
+    } file_transfer_header;
+
+class ChatClass
+{
+    public:
+        ChatClass( int this_port_number );
+        ~ChatClass( );
+
+        void send_text( char * this_text_p );
+        void send_data( void * this_data_p, int this_size );
+        int  read_data( char * in_to_bffer_p, int maximum_size );
+        int  set_non_blocking( int this_socket );
+        int  set_blocking( int this_socket );
+        void send_file ( char * path_and_name_p );
+
+    private:
+        int                  base_port_number;
+        int                  send_socket;
+        int                  receive_socket;
+        bool                 in_file_transfer;
+        int                  to_receive_count;
+        FILE               * out_file_p;
+        struct sockaddr_in   send_address;
+        struct sockaddr_in   receive_address;
+
+        int  how_many_are_running( void );
+        void receive_file_start( char * this_data_p, int this_byte_size );
+        void receive_file_block( char * this_data_p, int this_byte_size );
+} ;
+
+#endif
